@@ -168,5 +168,17 @@ add_action('wp_ajax_delete_logo', 'my_delete_logo_function');
 function my_delete_logo_function() {
     $logo = $_POST['logo'];
     delete_option($logo);
+
+$logo_url = get_option($logo);
+$upload_dir = wp_upload_dir();
+$file_path = str_replace($upload_dir['url'], $upload_dir['path'], $logo_url);
+  $file_path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $file_path);
+if (file_exists($file_path)) {
+    unlink($file_path);
+}
+
+
+
+
     wp_die();
 }
