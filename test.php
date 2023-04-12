@@ -9,6 +9,7 @@ Author URI: https://www.example.com/
 License: GPL2
 */
 // Add the product boxes with logo and price
+require_once ABSPATH . '/wp-admin/includes/image.php';
 function product_price_display() {
 global $product;
 $logo1 = get_option('logo');
@@ -85,25 +86,56 @@ function custom_settings_page() {
                 do_settings_sections('custom_settings');
             ?>
             <table class="form-table">
-                <?php $logos = array( 'logo', 'logo2', 'logo3', 'logo4'); ?>
-                <?php foreach ($logos as $logo) { ?>
-                    <tr>
-                        <th scope="row">
-                            <label for="<?php echo esc_attr($logo); ?>"><?php echo esc_html($logo); ?></label>
-                        </th>
-                        <td>
-                            <?php $logo_url = get_option($logo); ?>
-                            <input type="hidden" name="<?php echo esc_attr($logo); ?>" value="<?php echo esc_attr($logo_url); ?>" />
-                            <?php if ($logo_url) { ?>
-                                <img src="<?php echo esc_url($logo_url); ?>" alt="<?php echo esc_attr($logo); ?>" /><br />
-                                <input type="checkbox" name="<?php echo esc_attr($logo); ?>_delete" id="<?php echo esc_attr($logo); ?>_delete" value="1" />
-                                <label for="<?php echo esc_attr($logo); ?>_delete"><?php _e('Delete', 'textdomain'); ?></label>
-                            <?php } ?>
-                            <input type="file" name="<?php echo esc_attr($logo); ?>_file" id="<?php echo esc_attr($logo); ?>_file" />
-                        </td>
-                    </tr>
+    <?php $logos = array( 'logo', 'logo2', 'logo3', 'logo4'); ?>
+    <?php foreach ($logos as $logo) { ?>
+        <tr>
+            <th scope="row">
+                <label for="<?php echo esc_attr($logo); ?>"><?php echo esc_html($logo); ?></label>
+            </th>
+            <td>
+                <?php $logo_url = get_option($logo); ?>
+                <input type="hidden" name="<?php echo esc_attr($logo); ?>" value="<?php echo esc_attr($logo_url); ?>" />
+                <?php if ($logo_url) { ?>
+                    <img src="<?php echo esc_url($logo_url); ?>" alt="<?php echo esc_attr($logo); ?>" /><br />
+                    <button type="button" class="delete-logo" data-logo="<?php echo esc_attr($logo); ?>"><?php _e('Delete', 'textdomain'); ?></button>
                 <?php } ?>
-            </table>
+                <input type="file" name="<?php echo esc_attr($logo); ?>_file" id="<?php echo esc_attr($logo); ?>_file" />
+            </td>
+        </tr>
+
+    <?php } ?>
+</table>
+
+
+<script>
+    jQuery(document).ready(function($) {
+        $('.delete-logo').click(function(e) {
+            e.preventDefault();
+            var logo = $(this).data('logo');
+            if (confirm('Are you sure you want to delete the ' + logo + ' logo?')) {
+                $.ajax({
+                    type: 'POST',
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    data: {
+                        'action': 'delete_logo',
+                        'logo': logo
+                    },
+                    success: function(response) {
+                        // Reload the page after successful deletion
+                        location.reload();
+                    },
+                     error: function(jqXHR, textStatus, errorThrown) {
+        // Code to handle error response
+        console.log('AJAX Error:', textStatus, errorThrown);
+    }
+
+                });
+            }
+        });
+    });
+</script>
+
+
             <?php submit_button(); ?>
         </form>
     </div>
@@ -129,3 +161,12 @@ update_option($logo, $logo_url);
 }
 }
 add_action('admin_init', 'handle_logo_uploads');
+
+
+add_action('wp_ajax_delete_logo', 'my_delete_logo_function');
+
+function my_delete_logo_function() {
+    $logo = $_POST['logo'];
+    delete_option($logo);
+    wp_die();
+}
