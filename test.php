@@ -3,7 +3,7 @@
 Plugin Name: Product Price Display
 Plugin URI: https://www.example.com/product-price-display/
 Description: Adds the product price in small text to the product page.
-Version: 1.3
+Version: 1.7
 Author: Your Name
 Author URI: https://www.example.com/
 License: GPL2
@@ -11,20 +11,19 @@ License: GPL2
 // Add the product boxes with logo and price
 function product_price_display() {
     global $product;
-   global $product;
-
     $logo1 = get_option('logo1');
     $logo2 = get_option('logo2');
     $logo3 = get_option('logo3');
     $logo4 = get_option('logo4');
     if ( $product->get_price() ) {
         $price = wc_price( $product->get_price() );
-        // $logo1 = '<img src="https://www.dronelanka.com/wp-content/uploads/2023/04/BANK-TRANSFER-1-min.png" width="75" alt="Logo 1">';
+         $logox = '<img src="' . esc_url( $logo1 ) . '" width="75" alt="Logo 1">';
         // $logo2 = '<img src="https://www.dronelanka.com/wp-content/uploads/2023/04/BANK-TRANSFER-1-min.png" width="75" alt="Logo 2">';
         // $logo3 = '<img src="https://www.dronelanka.com/wp-content/uploads/2023/04/BANK-TRANSFER-min.png" width="75" alt="Logo 3">';
         // $logo4 = '<img src="https://www.dronelanka.com/wp-content/uploads/2023/04/BANK-TRANSFER-min.png" width="75" alt="Logo 4">';
         echo '<div class="product-row">';
-        echo '<div class="product-box">' . $logo1 . '<span class="product-price">' . $price . '</span></div>';
+
+        echo '<div class="product-box">' . $logox . '<span class="product-price">' . $price . '</span></div>';
         echo '<div class="product-box">' . $logo2 . '<span class="product-price">' . $price . '</span></div>';
         echo '</div>';
         echo '<div class="product-row">';
@@ -60,6 +59,19 @@ function wpdocs_register_custom_settings_page() {
     );
 }
 add_action('admin_menu', 'wpdocs_register_custom_settings_page');
+// Register a new setting in the WordPress database
+// Register a new setting in the WordPress database
+function register_custom_settings() {
+    register_setting(
+        'custom_settings_group', // Option group
+        'logo1', // Option name
+        array(
+            'sanitize_callback' => 'esc_url_raw' // Sanitize the uploaded image URL
+        )
+    );
+}
+
+add_action('admin_init', 'register_custom_settings');
 
 // Callback function to render the custom settings page
 function custom_settings_page() {
@@ -77,23 +89,12 @@ function custom_settings_page() {
                         <label for="logo1">Logo 1</label>
                     </th>
                     <td>
-                        <input type="file" name="logo1" id="logo1" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">
-                        <label for="logo2">Logo 2</label>
-                    </th>
-                    <td>
-                        <input type="file" name="logo2" id="logo2" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">
-                        <label for="logo3">Logo 3</label>
-                    </th>
-                    <td>
-                        <input type="file" name="logo3" id="logo3" />
+                        <?php $logo1 = get_option('logo1'); ?>
+                        <input type="hidden" name="logo1" value="<?php echo esc_attr($logo1); ?>" />
+                        <?php if ($logo1) { ?>
+                            <img src="<?php echo esc_url($logo1); ?>" alt="Logo 1" /><br />
+                        <?php } ?>
+                        <input type="file" name="logo1_file" id="logo1_file" />
                     </td>
                 </tr>
             </table>
@@ -103,24 +104,18 @@ function custom_settings_page() {
     <?php
 }
 
-// Register a new setting in the WordPress database
-function register_custom_settings() {
-    register_setting(
-        'custom_settings_group', // Option group
-        'logo1' // Option name
-    );
-    register_setting(
-        'custom_settings_group', // Option group
-        'logo2' // Option name
-    );
-    register_setting(
-        'custom_settings_group', // Option group
-        'logo3' // Option name
-    );
-
-    register_setting(
-        'custom_settings_group', // Option group
-        'logo4' // Option name
-    );
+// Handle uploaded image and update the 'logo1' option in the database
+function handle_logo1_upload() {
+    if (!empty($_FILES['logo1_file']['name'])) {
+        $file = $_FILES['logo1_file'];
+        $upload_dir = wp_upload_dir();
+        $upload_path = $upload_dir['path'] . '/';
+        $file_name = wp_unique_filename($upload_path, $file['name']);
+        $file_path = $upload_path . $file_name;
+        move_uploaded_file($file['tmp_name'], $file_path);
+        $logo1_url = $upload_dir['url'] . '/' . $file_name;
+        update_option('logo1', $logo1_url);
+  update_option('logo2', 'death came');
+    }
 }
-add_action('admin_init', 'register_custom_settings');
+add_action('admin_init', 'handle_logo1_upload');
