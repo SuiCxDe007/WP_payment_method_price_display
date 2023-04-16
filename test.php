@@ -79,13 +79,18 @@ function product_box_styles() {
             overflow: auto;
             background-color: rgba(0, 0, 0, 0.4);
         }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 20%;
-        }
+  .modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
       .close { color: #aaa; position: absolute; top: 5px; right: 10px; font-size: 28px; font-weight: bold; }
 
         .close:hover,
@@ -94,6 +99,20 @@ function product_box_styles() {
             text-decoration: none;
             cursor: pointer;
         }
+    /* Media query for mobile devices */
+    @media only screen and (max-width: 768px) {
+        .modal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 80%;
+            margin: 0;
+            padding: 20px;
+            border: 1px solid #888;
+        }
+    }
     </style>';
 
     // Add JavaScript to show the discount modal
