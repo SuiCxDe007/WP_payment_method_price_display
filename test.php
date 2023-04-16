@@ -181,7 +181,32 @@ function custom_settings_page() {
 
                 <?php } ?>
             </table>
-
+    <script>
+    jQuery(document).ready(function($) {
+        $('.delete-logo').click(function(e) {
+            e.preventDefault();
+            var logo = $(this).data('logo');
+            if (confirm('Are you sure you want to delete the ' + logo + ' logo?')) {
+                $.ajax({
+                    type: 'POST',
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    data: {
+                        'action': 'delete_logo',
+                        'logo': logo
+                    },
+                    success: function(response) {
+                        // Reload the page after successful deletion
+                        location.reload();
+                    },
+                     error: function(jqXHR, textStatus, errorThrown) {
+        // Code to handle error response
+        console.log('AJAX Error:', textStatus, errorThrown);
+    }
+                });
+            }
+        });
+    });
+</script>
             <?php submit_button(); ?>
         </form>
     </div>
@@ -225,7 +250,7 @@ add_action('wp_ajax_delete_logo', 'my_delete_logo_function');
 function my_delete_logo_function() {
     $logo = $_POST['logo'];
     delete_option($logo);
-
+delete_option($logo . '_discount');
 $logo_url = get_option($logo);
 $upload_dir = wp_upload_dir();
 $file_path = str_replace($upload_dir['url'], $upload_dir['path'], $logo_url);
