@@ -11,37 +11,46 @@ License: GPL2
 // Add the product boxes with logo and price
 require_once ABSPATH . '/wp-admin/includes/image.php';
 function product_price_display() {
-global $product;
-$logo1 = get_option('logo');
-$logo2 = get_option('logo2');
-$logo3 = get_option('logo3');
-$logo4 = get_option('logo4');
-if ( $product->get_price() ) {
-    $price = wc_price( $product->get_price() );
-    $logos = array($logo1, $logo2, $logo3, $logo4);
-    echo '<div class="product-row">';
-    foreach ($logos as $index => $logo) {
-        if (!empty($logo)) {
-            $logoImg = '<img src="' . esc_url($logo) . '" width="75" alt="Logo ' . ($index+1) . '">';
-            echo '<div class="product-box">' . $logoImg . '<span class="product-price">' . $price . ($index+1) . '</span></div>';
+    global $product;
+    $logos = array(
+        'logo' => get_option('logo'),
+        'logo2' => get_option('logo2'),
+        'logo3' => get_option('logo3'),
+        'logo4' => get_option('logo4'),
+        'logo5' => get_option('logo5'),
+    );
+
+    if ( $product->get_price() ) {
+        $price = wc_price( $product->get_price() );
+        $keys = array_keys($logos);
+        echo '<div class="product-row">';
+        foreach ($keys as $index => $key) {
+            $logo = $logos[$key];
+            $discount = get_option($key . '_discount', 0);
+            $lastPrice = $product->get_price() * (1 - ($discount/100));
+            if (!empty($logo)) {
+                $logoImg = '<img src="' . esc_url($logo) . '" width="100" alt="Logo ' . ($index+1) . '">';
+                echo '<div class="product-box">' . $logoImg . '<span class="product-price">' .  wc_price($lastPrice) . '</span></div>';
+            }
         }
+        echo '</div>';
     }
-    echo '</div>';
 }
 
 
-}
+
 add_action( 'woocommerce_single_product_summary', 'product_price_display', 20 );
 
 // Add styles for the product boxes
 function product_box_styles() {
     echo '<style>.product-row { display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 7px; }';
-    echo '.product-box { width: calc(50% - 5px); text-align: center; margin-bottom: 5px; border: 1px solid red; padding: 2px;}';
-    echo '.product-box:nth-child(2n+1) { margin-right: 10px; }';
-    echo '.product-box:hover { box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3); }';
+    echo '.product-box { width: calc(50% - 5px); text-align: center; margin-bottom: 5px; border: 1px solid red; padding: 2px; border-radius: 5px;}';
+    echo '.product-box:nth-child(2n+1) { margin-right: 7px; }';
+    echo '.product-box:hover { box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3); font-weight: bold; }'; // added font-weight: bold on hover
     echo '.product-row .product-box:first-child:last-child { width: 100%; }';
     echo '</style>';
 }
+
 
 add_action( 'wp_head', 'product_box_styles' );
 
@@ -86,80 +95,64 @@ function custom_settings_page() {
                 do_settings_sections('custom_settings');
             ?>
             <table class="form-table">
-    <?php $logos = array( 'logo', 'logo2', 'logo3', 'logo4'); ?>
-    <?php foreach ($logos as $logo) { ?>
-        <tr>
-            <th scope="row">
-                <label for="<?php echo esc_attr($logo); ?>"><?php echo esc_html($logo); ?></label>
-            </th>
-            <td>
-                <?php $logo_url = get_option($logo); ?>
-                <input type="hidden" name="<?php echo esc_attr($logo); ?>" value="<?php echo esc_attr($logo_url); ?>" />
-                <?php if ($logo_url) { ?>
-                    <img src="<?php echo esc_url($logo_url); ?>" alt="<?php echo esc_attr($logo); ?>" /><br />
-                    <button type="button" class="delete-logo" data-logo="<?php echo esc_attr($logo); ?>"><?php _e('Delete', 'textdomain'); ?></button>
+                <?php $logos = array( 'logo', 'logo2', 'logo3', 'logo4','logo5'); ?>
+                <?php foreach ($logos as $logo) { ?>
+                    <tr>
+                        <th scope="row">
+                            <label for="<?php echo esc_attr($logo); ?>"><?php echo esc_html($logo); ?></label>
+                        </th>
+                        <td>
+                            <?php $logo_url = get_option($logo); ?>
+                            <input type="hidden" name="<?php echo esc_attr($logo); ?>" value="<?php echo esc_attr($logo_url); ?>" />
+                            <?php if ($logo_url) { ?>
+                                <img src="<?php echo esc_url($logo_url); ?>" alt="<?php echo esc_attr($logo); ?>" /><br />
+                                <button type="button" class="delete-logo" data-logo="<?php echo esc_attr($logo); ?>"><?php _e('Delete', 'textdomain'); ?></button>
+                            <?php } ?>
+                            <input type="file" name="<?php echo esc_attr($logo); ?>_file" id="<?php echo esc_attr($logo); ?>_file" />
+                            <br>
+                            <label for="<?php echo esc_attr($logo); ?>_discount">Discount Percentage</label>
+                            <input type="number" min="0" max="100" step="0.1" name="<?php echo esc_attr($logo); ?>_discount" id="<?php echo esc_attr($logo); ?>_discount" value="<?php echo esc_attr(get_option($logo . '_discount', 0)); ?>" />
+                        </td>
+                    </tr>
+
                 <?php } ?>
-                <input type="file" name="<?php echo esc_attr($logo); ?>_file" id="<?php echo esc_attr($logo); ?>_file" />
-            </td>
-        </tr>
-
-    <?php } ?>
-</table>
-
-
-<script>
-    jQuery(document).ready(function($) {
-        $('.delete-logo').click(function(e) {
-            e.preventDefault();
-            var logo = $(this).data('logo');
-            if (confirm('Are you sure you want to delete the ' + logo + ' logo?')) {
-                $.ajax({
-                    type: 'POST',
-                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                    data: {
-                        'action': 'delete_logo',
-                        'logo': logo
-                    },
-                    success: function(response) {
-                        // Reload the page after successful deletion
-                        location.reload();
-                    },
-                     error: function(jqXHR, textStatus, errorThrown) {
-        // Code to handle error response
-        console.log('AJAX Error:', textStatus, errorThrown);
-    }
-
-                });
-            }
-        });
-    });
-</script>
-
+            </table>
 
             <?php submit_button(); ?>
         </form>
     </div>
     <?php
-
-
 }
+
 // Handle uploaded image and update the 'logoOne' option in the database
 function handle_logo_uploads() {
-$logos = array('logo', 'logo2', 'logo3', 'logo4');
-foreach ($logos as $logo) {
-if (!empty($_FILES[$logo . '_file']['name'])) {
-$file = $_FILES[$logo . '_file'];
-$upload_dir = wp_upload_dir();
-$upload_path = $upload_dir['path'] . '/';
-$file_name = wp_unique_filename($upload_path, $file['name']);
-$file_path = $upload_path . $file_name;
-move_uploaded_file($file['tmp_name'], $file_path);
-$logo_url = $upload_dir['url'] . '/' . $file_name;
-update_option($logo, $logo_url);
+    $logos = array('logo', 'logo2', 'logo3', 'logo4','logo5');
+    foreach ($logos as $logo) {
+        $logo_url = get_option($logo);
+        if (!empty($_FILES[$logo . '_file']['name'])) {
+            $file = $_FILES[$logo . '_file'];
+            $upload_dir = wp_upload_dir();
+            $upload_path = $upload_dir['path'] . '/';
+            $file_name = wp_unique_filename($upload_path, $file['name']);
+            $file_path = $upload_path . $file_name;
+            move_uploaded_file($file['tmp_name'], $file_path);
+            $logo_url = $upload_dir['url'] . '/' . $file_name;
+            update_option($logo, $logo_url);
+            error_log('This is a debug message');
+            error_log('This is a debug message');
+        }
+
+        // Update logo discount
+        if (isset($_POST[$logo . '_discount'])) {
+$discount = floatval($_POST[$logo . '_discount']);
+
+            update_option($logo . '_discount', $discount);
+        }
+    }
 }
 
-}
-}
+
+
 add_action('admin_init', 'handle_logo_uploads');
 
 
@@ -176,9 +169,5 @@ $file_path = str_replace($upload_dir['url'], $upload_dir['path'], $logo_url);
 if (file_exists($file_path)) {
     unlink($file_path);
 }
-
-
-
-
     wp_die();
 }
