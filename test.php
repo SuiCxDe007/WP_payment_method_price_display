@@ -32,11 +32,12 @@ function product_price_display()
             $discount = get_option($key . '_discount', 0);
             $name = get_option($key . '_payment_name', 0);
             $description = get_option($key . '_description', 0);
+            $valid = get_option($key . '_valid_till', 0);
             $lastPrice = $product->get_price() * (1 - ($discount / 100));
             if (!empty($logo))
             {
                 $logoImg = '<img src="' . esc_url($logo) . '" width="100" alt="Logo ' . ($index + 1) . '">';
-                echo '<div class="product-box" data-discount="' . esc_attr($discount) . '" data-name="' . esc_attr($name) . '" data-description="' . esc_attr($description) . '">' . $logoImg . '<span class="product-price">' . wc_price($lastPrice) . '</span></div>';
+                echo '<div class="product-box" data-discount="' . esc_attr($discount) . '" data-name="' . esc_attr($name) . '" data-description="' . esc_attr($description) . '" data-valid="' . esc_attr($valid) . '">' . $logoImg . '<span class="product-price">' . wc_price($lastPrice) . '</span></div>';
             }
         }
         echo '</div>';
@@ -104,6 +105,11 @@ function product_box_styles()
                 font-size:16px
             }
 
+.valid-date {
+    font-size: 12px;
+    padding:0;
+    margin-bottom:5px;
+}
 
         .modal-content {
             background-color: #fff;
@@ -169,25 +175,31 @@ function product_box_styles()
     }
     </style>';
 
-    // Add JavaScript to show the discount modal
     echo '<script>
         jQuery(document).ready(function() {
             jQuery(".product-box").click(function() {
                 var discount = jQuery(this).data("discount");
                 var name = jQuery(this).data("name");
                 var description = jQuery(this).data("description");
-                var modal = "<div class=\"modal\"><div class=\"modal-content\"><div class=\"modal-header\"><h5>" + name + "</h5><span class=\"close\">&times;</span></div><p>" + description + "</p><p>Discount Percentage: <span class=\"discount-circle\">" + discount + "%</span></p></div></div>";
+                var valid = jQuery(this).data("valid");
+                var modalHeader = "<div class=\"modal-header\"><h5>" + name + "</h5><span class=\"close\">&times;</span></div>";
+                var modalContent = "<p>" + description + "</p><p>Discount Percentage: <span class=\"discount-circle\">" + discount + "%</span></p>";
+                if (valid) {
+                    modalContent += "<span class=\"valid-date\">Valid Till : "+ valid + "</span>";
+                }
+                var modal = "<div class=\"modal\"><div class=\"modal-content\">" + modalHeader + modalContent + "</div></div>";
                 jQuery("body").append(modal);
                 jQuery(".modal").show();
                 jQuery(".close").click(function() {
                     jQuery(".modal").remove();
                 });
-                    jQuery(".modal").click(function() {
+                jQuery(".modal").click(function() {
                     jQuery(".modal").remove();
                 });
             });
         });
     </script>';
+
 }
 
 add_action('wp_head', 'product_box_styles');
@@ -231,7 +243,7 @@ function custom_settings_page()
 ?>
     <div class="wrap">
         <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
-        <form method="post" action="options.php" enctype="multipart/form-data">
+        <form id="myForm" method="post" action="options.php" enctype="multipart/form-data">
             <?php
     settings_fields('custom_settings_group');
     do_settings_sections('custom_settings');
@@ -266,12 +278,14 @@ function custom_settings_page()
 
                             <br>
                             <label for="<?php echo esc_attr($logo); ?>_payment_name">Payment Method Name</label>
-                            <input type="text" name="<?php echo esc_attr($logo); ?>_payment_name" id="<?php echo esc_attr($logo); ?>_payment_name" value="<?php echo esc_attr(get_option($logo . '_payment_name', '')); ?>" />
+                            <input type="text" name="<?php echo esc_attr($logo); ?>_payment_name" id="<?php echo esc_attr($logo); ?>_payment_name" value="<?php echo esc_attr(get_option($logo . '_payment_name', null)); ?>" />
                             <br>
                             <label for="<?php echo esc_attr($logo); ?>_description">Description</label>
                             <input type="text" name="<?php echo esc_attr($logo); ?>_description" id="<?php echo esc_attr($logo); ?>_description" value="<?php echo esc_attr(get_option($logo . '_description', '')); ?>" />
                             <br>
-
+                            <label for="<?php echo esc_attr($logo); ?>_valid_till">Valid Till (Date)</label>
+                            <input type="text" name="<?php echo esc_attr($logo); ?>_valid_till" id="<?php echo esc_attr($logo); ?>_valid_till" value="<?php echo esc_attr(get_option($logo . '_valid_till', '')); ?>" />
+                            <br>
 
 
                         </td>
@@ -305,6 +319,26 @@ function custom_settings_page()
             }
         });
     });
+
+
+    jQuery(document).ready(function() {
+        jQuery('#myForm').submit(function(event) {
+            var error = false;
+            jQuery('.form-table img').each(function() {
+                var logo = jQuery(this).attr('alt');
+                var payment_name = jQuery('#' + logo + '_payment_name').val();
+                if (jQuery(this).attr('src') && payment_name == '') {
+                    alert('Please enter a payment method name for ' + logo);
+                    error = true;
+                    return false; // exit loop
+                }
+            });
+            if (error) {
+                event.preventDefault(); // stop form submission
+            }
+        });
+    });
+
 </script>
             <?php submit_button(); ?>
         </form>
@@ -360,6 +394,13 @@ function handle_logo_uploads()
 
             update_option($logo . '_description', $payment_method_description);
         }
+        // Update payment  _valid_till
+        if (isset($_POST[$logo . '_valid_till']))
+        {
+            $_valid_till = sanitize_textarea_field($_POST[$logo . '_valid_till']);
+
+            update_option($logo . '_valid_till', $_valid_till);
+        }
     }
 }
 
@@ -372,6 +413,9 @@ function my_delete_logo_function()
     $logo = $_POST['logo'];
     delete_option($logo);
     delete_option($logo . '_discount');
+    delete_option($logo . '_valid_till');
+    delete_option($logo . '_description');
+    delete_option($logo . '_payment_name');
     $logo_url = get_option($logo);
     $upload_dir = wp_upload_dir();
     $file_path = str_replace($upload_dir['url'], $upload_dir['path'], $logo_url);
@@ -385,4 +429,3 @@ function my_delete_logo_function()
     }
     wp_die();
 }
-
