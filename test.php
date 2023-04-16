@@ -30,29 +30,93 @@ function product_price_display() {
             $lastPrice = $product->get_price() * (1 - ($discount/100));
             if (!empty($logo)) {
                 $logoImg = '<img src="' . esc_url($logo) . '" width="100" alt="Logo ' . ($index+1) . '">';
-                echo '<div class="product-box">' . $logoImg . '<span class="product-price">' .  wc_price($lastPrice) . '</span></div>';
+                echo '<div class="product-box" data-discount="' . esc_attr($discount) . '">' . $logoImg . '<span class="product-price">' .  wc_price($lastPrice) . '</span></div>';
             }
         }
         echo '</div>';
     }
 }
 
-
-
 add_action( 'woocommerce_single_product_summary', 'product_price_display', 20 );
 
 // Add styles for the product boxes
 function product_box_styles() {
-    echo '<style>.product-row { display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 7px; }';
-    echo '.product-box { width: calc(50% - 5px); text-align: center; margin-bottom: 5px; border: 1px solid red; padding: 2px; border-radius: 5px;}';
-    echo '.product-box:nth-child(2n+1) { margin-right: 7px; }';
-    echo '.product-box:hover { box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3); font-weight: bold; }'; // added font-weight: bold on hover
-    echo '.product-row .product-box:first-child:last-child { width: 100%; }';
-    echo '</style>';
+    echo '<style>
+        .product-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 7px;
+        }
+        .product-box {
+            width: calc(50% - 5px);
+            text-align: center;
+            margin-bottom: 5px;
+            border: 1px solid red;
+            padding: 2px;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+        .product-box:nth-child(2n+1) {
+            margin-right: 7px;
+        }
+        .product-box:hover {
+            box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3);
+            font-weight: bold;
+        }
+        .product-row .product-box:first-child:last-child {
+            width: 100%;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 20%;
+        }
+      .close { color: #aaa; position: absolute; top: 5px; right: 10px; font-size: 28px; font-weight: bold; }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>';
+
+    // Add JavaScript to show the discount modal
+    echo '<script>
+        jQuery(document).ready(function() {
+            jQuery(".product-box").click(function() {
+                var discount = jQuery(this).data("discount");
+                var modal = "<div class=\"modal\"><div class=\"modal-content\"><span class=\"close\">&times;</span><p>This is your discount:</p><p>" + discount + "%</p></div></div>";
+                jQuery("body").append(modal);
+                jQuery(".modal").show();
+                jQuery(".close").click(function() {
+                    jQuery(".modal").remove();
+                });
+                    jQuery(".modal").click(function() {
+                    jQuery(".modal").remove();
+                });
+            });
+        });
+    </script>';
 }
 
 
-add_action( 'wp_head', 'product_box_styles' );
+add_action('wp_head', 'product_box_styles');
 
 // Adjust margin top of short description
 function adjust_short_desc_margin_top() {
