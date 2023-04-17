@@ -1,11 +1,11 @@
 <?php
 /*
-Plugin Name: Product Price Display
-Plugin URI: https://www.example.com/product-price-display/
-Description: Adds the product price in small text to the product page.
-Version: 1.6
-Author: Your Name
-Author URI: https://www.example.com/
+Plugin Name: Product Offer Display
+Plugin URI: https://www.github.com/suicxde007
+Description: Adds the product offers in product page in various banks, cards etc.
+Version: 1.8
+Author: Kaveen Abeyrathne
+Author URI: https://www.github.com/suicxde007
 License: GPL2
 */
 // Add the product boxes with logo and price
@@ -19,6 +19,11 @@ function product_price_display()
         'logo3' => get_option('logo3') ,
         'logo4' => get_option('logo4') ,
         'logo5' => get_option('logo5') ,
+        'logo5' => get_option('logo6') ,
+        'logo5' => get_option('logo7') ,
+        'logo5' => get_option('logo8') ,
+        'logo5' => get_option('logo9') ,
+        'logo5' => get_option('logo10') ,
     );
 
     if ($product->get_price())
@@ -213,8 +218,8 @@ add_action('wp_head', 'adjust_short_desc_margin_top');
 
 function wpdocs_register_custom_settings_page()
 {
-    add_options_page('Custom Settings', // Page Title
-    'Custom Settings', // Menu Title
+    add_options_page('Product Offer Display Settings', // Page Title
+    'Product Offer Display Settings', // Menu Title
     'manage_options', // Capability
     'custom_settings', // Menu Slug
     'custom_settings_page'
@@ -248,13 +253,106 @@ function custom_settings_page()
     settings_fields('custom_settings_group');
     do_settings_sections('custom_settings');
 ?>
+<style>
+    .form-table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        margin-top: 20px;
+        margin-left: 0;
+    }
+
+    .form-table th {
+        text-align: left;
+        font-weight: bold;
+        padding: 10px 20px;
+        border-bottom: 2px solid #ccc;
+        background-color: #f2f2f2;
+    }
+
+    .form-table td {
+        padding: 10px 20px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .form-table img {
+        max-width: 200px;
+        max-height: 100px;
+        margin-right: 10px;
+    }
+
+    .form-table button.delete-logo {
+        background-color: #f44336;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 5px;
+    }
+
+    .form-table button.delete-logo:hover {
+        background-color: #d32f2f;
+    }
+
+.form-table input[type="file"] {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #fff;
+  background-color: #4CAF50;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-table input[type="file"]:hover {
+  background-color: #3e8e41;
+}
+
+.form-table input[type="file"]:focus {
+  outline: none;
+  border-color: #4d90fe;
+  box-shadow: 0 0 4px #4d90fe;
+}
+
+
+    .form-table label {
+        font-weight: bold;
+    }
+
+    .form-table input[type="text"],
+    .form-table input[type="number"] {
+        width: 100%;
+        max-width: 400px;
+        padding: 5px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .form-table input[type="text"]:focus,
+    .form-table input[type="number"]:focus {
+        outline: none;
+        border-color: #4d90fe;
+        box-shadow: 0 0 4px #4d90fe;
+    }
+</style>
+
             <table class="form-table">
                 <?php $logos = array(
         'logo',
         'logo2',
         'logo3',
         'logo4',
-        'logo5'
+        'logo5',
+        'logo6',
+        'logo7',
+        'logo8',
+        'logo9',
+        'logo10'
     ); ?>
                 <?php foreach ($logos as $logo)
     { ?>
@@ -280,10 +378,10 @@ function custom_settings_page()
                             <label for="<?php echo esc_attr($logo); ?>_payment_name">Payment Method Name</label>
                             <input type="text" name="<?php echo esc_attr($logo); ?>_payment_name" id="<?php echo esc_attr($logo); ?>_payment_name" value="<?php echo esc_attr(get_option($logo . '_payment_name', null)); ?>" />
                             <br>
-                            <label for="<?php echo esc_attr($logo); ?>_description">Description</label>
+                            <label for="<?php echo esc_attr($logo); ?>_description">Description</label><br>
                             <input type="text" name="<?php echo esc_attr($logo); ?>_description" id="<?php echo esc_attr($logo); ?>_description" value="<?php echo esc_attr(get_option($logo . '_description', '')); ?>" />
                             <br>
-                            <label for="<?php echo esc_attr($logo); ?>_valid_till">Valid Till (Date)</label>
+                            <label for="<?php echo esc_attr($logo); ?>_valid_till">Valid Till (Date)</label><br>
                             <input type="text" name="<?php echo esc_attr($logo); ?>_valid_till" id="<?php echo esc_attr($logo); ?>_valid_till" value="<?php echo esc_attr(get_option($logo . '_valid_till', '')); ?>" />
                             <br>
 
@@ -354,7 +452,12 @@ function handle_logo_uploads()
         'logo2',
         'logo3',
         'logo4',
-        'logo5'
+        'logo5',
+        'logo6',
+        'logo7',
+        'logo8',
+        'logo9',
+        'logo10'
     );
     foreach ($logos as $logo)
     {
