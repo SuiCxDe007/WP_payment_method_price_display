@@ -19,11 +19,11 @@ function product_price_display()
         'logo3' => get_option('logo3') ,
         'logo4' => get_option('logo4') ,
         'logo5' => get_option('logo5') ,
-        'logo5' => get_option('logo6') ,
-        'logo5' => get_option('logo7') ,
-        'logo5' => get_option('logo8') ,
-        'logo5' => get_option('logo9') ,
-        'logo5' => get_option('logo10') ,
+        'logo6' => get_option('logo6') ,
+        'logo7' => get_option('logo7') ,
+        'logo8' => get_option('logo8') ,
+        'logo9' => get_option('logo9') ,
+        'logo10' => get_option('logo10') ,
     );
 
     if ($product->get_price())
@@ -59,7 +59,8 @@ function product_box_styles()
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            margin-top: 7px;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
         .product-box {
             width: calc(50% - 5px);
@@ -218,12 +219,14 @@ add_action('wp_head', 'adjust_short_desc_margin_top');
 
 function wpdocs_register_custom_settings_page()
 {
-    add_options_page('Product Offer Display Settings', // Page Title
-    'Product Offer Display Settings', // Menu Title
+    add_menu_page('Product Offer Display Settings', // Page Title
+    'Product Offer Display', // Menu Title
     'manage_options', // Capability
     'custom_settings', // Menu Slug
-    'custom_settings_page'
-    // Callback function to render the page
+    'custom_settings_page', // Callback function to render the page
+    'dashicons-products', // Icon URL
+    50
+    // Position in the menu
     );
 }
 add_action('admin_menu', 'wpdocs_register_custom_settings_page');
@@ -246,8 +249,17 @@ add_action('admin_init', 'register_custom_settings');
 function custom_settings_page()
 {
 ?>
-    <div class="wrap">
-        <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+   <div class="wrap">
+    <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+
+    <h2 class="nav-tab-wrapper">
+        <a href="#" class="nav-tab nav-tab-active" data-tab="general">General</a>
+        <a href="#" class="nav-tab" data-tab="logos">Logos</a>
+    </h2>
+
+    <div id="general" class="settings-tab">
+         <div class="wrap">
+        <h1>Update Offers</h1>
         <form id="myForm" method="post" action="options.php" enctype="multipart/form-data">
             <?php
     settings_fields('custom_settings_group');
@@ -339,6 +351,9 @@ function custom_settings_page()
         border-color: #4d90fe;
         box-shadow: 0 0 4px #4d90fe;
     }
+
+
+
 </style>
 
             <table class="form-table">
@@ -437,10 +452,30 @@ function custom_settings_page()
         });
     });
 
+      jQuery(document).ready(function($) {
+        $('.nav-tab-wrapper a').click(function(event) {
+            event.preventDefault();
+            $('.nav-tab-wrapper a').removeClass('nav-tab-active');
+            $(this).addClass('nav-tab-active');
+            $('.settings-tab').hide();
+            $('#' + $(this).data('tab')).show();
+        });
+    });
+
 </script>
             <?php submit_button(); ?>
         </form>
     </div>
+    </div>
+
+    <div id="logos" class="settings-tab" style="display: none;">
+        <!-- Logos settings section goes here -->
+    </div>
+</div>
+
+
+
+
     <?php
 }
 
@@ -532,3 +567,4 @@ function my_delete_logo_function()
     }
     wp_die();
 }
+
