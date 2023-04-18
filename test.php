@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Product Offer Display
+Plugin Name: Bank/Card Offer Display
 Plugin URI: https://www.github.com/suicxde007
-Description: Adds the product offers in product page in various banks, cards etc.
+Description: Adds the bank/card offers in product page.
 Version: 1.8
 Author: Kaveen Abeyrathne
 Author URI: https://www.github.com/suicxde007
@@ -219,8 +219,8 @@ add_action('wp_head', 'adjust_short_desc_margin_top');
 
 function wpdocs_register_custom_settings_page()
 {
-    add_menu_page('Product Offer Display Settings', // Page Title
-    'Product Offer Display', // Menu Title
+    add_menu_page('Bank/Card Offer Display Settings', // Page Title
+    'Bank/Card Offer Display', // Menu Title
     'manage_options', // Capability
     'custom_settings', // Menu Slug
     'custom_settings_page', // Callback function to render the page
@@ -249,15 +249,54 @@ add_action('admin_init', 'register_custom_settings');
 function custom_settings_page()
 {
 ?>
+<style>
+
+
+
+.nav-tab {
+  position: relative;
+  padding: 10px 15px;
+  margin-right: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-bottom: none;
+  border-radius: 5px 5px 0 0;
+}
+
+.nav-tab:hover {
+  background-color: #f9f9f9;
+  border-color: #999;
+}
+
+.nav-tab-active {
+  color: #fff;
+  background-color: #0073aa;
+  border-color: #0073aa;
+}
+
+.nav-tab:focus {
+  color: #fff;
+  background-color: #0073aa;
+  border-color: #0073aa;
+}
+
+
+
+
+</style>
    <div class="wrap">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
     <h2 class="nav-tab-wrapper">
-        <a href="#" class="nav-tab nav-tab-active" data-tab="general">General</a>
-        <a href="#" class="nav-tab" data-tab="logos">Logos</a>
+                    <a href="#" class="nav-tab nav-tab-active" data-tab="logos">Instructions</a>
+            <a href="#" class="nav-tab" data-tab="general">General Settings</a>
     </h2>
 
-    <div id="general" class="settings-tab">
+    <div id="general" class="settings-tab"  style="display: none;">
          <div class="wrap">
         <h1>Update Offers</h1>
         <form id="myForm" method="post" action="options.php" enctype="multipart/form-data">
@@ -368,12 +407,12 @@ function custom_settings_page()
         'logo8',
         'logo9',
         'logo10'
-    ); ?>
+    ); ?><?php $counter = 1; ?>
                 <?php foreach ($logos as $logo)
     { ?>
                     <tr>
                         <th scope="row">
-                            <label for="<?php echo esc_attr($logo); ?>"><?php echo esc_html($logo); ?></label>
+                            <label> <h3> Offer  <?php echo $counter++; ?></h3> </label>
                         </th>
                         <td>
                             <?php $logo_url = get_option($logo); ?>
@@ -390,13 +429,13 @@ function custom_settings_page()
                             <input type="number" min="0" max="100" step="0.1" name="<?php echo esc_attr($logo); ?>_discount" id="<?php echo esc_attr($logo); ?>_discount" value="<?php echo esc_attr(get_option($logo . '_discount', 0)); ?>" />
 
                             <br>
-                            <label for="<?php echo esc_attr($logo); ?>_payment_name">Payment Method Name</label>
+                            <label for="<?php echo esc_attr($logo); ?>_payment_name">Offer Name <span>(Required)<b style="color: red">*</b></span></label>
                             <input type="text" name="<?php echo esc_attr($logo); ?>_payment_name" id="<?php echo esc_attr($logo); ?>_payment_name" value="<?php echo esc_attr(get_option($logo . '_payment_name', null)); ?>" />
                             <br>
-                            <label for="<?php echo esc_attr($logo); ?>_description">Description</label><br>
+                            <label for="<?php echo esc_attr($logo); ?>_description">Offer Description</label><br>
                             <input type="text" name="<?php echo esc_attr($logo); ?>_description" id="<?php echo esc_attr($logo); ?>_description" value="<?php echo esc_attr(get_option($logo . '_description', '')); ?>" />
                             <br>
-                            <label for="<?php echo esc_attr($logo); ?>_valid_till">Valid Till (Date)</label><br>
+                            <label for="<?php echo esc_attr($logo); ?>_valid_till">Offer Valid Till (Date)</label><br>
                             <input type="text" name="<?php echo esc_attr($logo); ?>_valid_till" id="<?php echo esc_attr($logo); ?>_valid_till" value="<?php echo esc_attr(get_option($logo . '_valid_till', '')); ?>" />
                             <br>
 
@@ -467,9 +506,43 @@ function custom_settings_page()
         </form>
     </div>
     </div>
+<style>
+    .wrap {
+        margin: 20px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    h1 {
+        font-size: 2.2em;
+        margin-bottom: 20px;
+    }
+    p {
+        font-size: 1.5em;
+        line-height: 1.2;
+        margin-bottom: 20px;
+    }
+    img {
+  max-width: 100%;
+}
 
-    <div id="logos" class="settings-tab" style="display: none;">
-        <!-- Logos settings section goes here -->
+</style>
+
+    <div id="logos" class="settings-tab">
+        <div class="wrap">
+        <h1><b>Instructions</b></h1>
+        <p>You can show offers available for Spcific Banks, Credit/Debit Cards, Payment Gateways etc. on the product page using this Plugin. </p>
+        <p>Following is a example of how it will show in the Product Page.</p>
+        <img src="<?php echo plugins_url('ins-1.png', __FILE__); ?>" alt="Image description" class="my-image"  width="1031" height="619" />
+        <hr>
+         <p>Once you <b>hover over</b> a offer it will highlight by making price bolder and a hint of red below the offer box</p>
+         <img src="<?php echo plugins_url('ins-2.png', __FILE__); ?>" alt="Image description" class="my-image"  width="750" height="450" />
+         <hr>
+          <p>Once you <b>click</b> over a offer it open a popup with more info which you can customize.</p>
+         <img src="<?php echo plugins_url('ins-3.png', __FILE__); ?>" alt="Image description" class="my-image"  width="750" height="450" />
+          <p>Following Image shows what each field in <b>General Settings</b> is mapped.</p>
+<img src="<?php echo plugins_url('ins-settings.png', __FILE__); ?>" alt="Image description" class="my-image"  width="750" height="450" />
+    </div>
     </div>
 </div>
 
