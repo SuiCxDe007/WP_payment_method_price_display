@@ -533,15 +533,15 @@ function custom_settings_page()
         <h1><b>Instructions</b></h1>
         <p>You can show offers available for Spcific Banks, Credit/Debit Cards, Payment Gateways etc. on the product page using this Plugin. </p>
         <p>Following is a example of how it will show in the Product Page.</p>
-        <img src="<?php echo plugins_url('ins-1.png', __FILE__); ?>" alt="Image description" class="my-image"  width="1031" height="619" />
+        <img src="<?php echo plugins_url('./assets/ins-1.png', __FILE__); ?>" alt="Image description" class="my-image"  width="1031" height="619" />
         <hr>
          <p>Once you <b>hover over</b> a offer it will highlight by making price bolder and a hint of red below the offer box</p>
-         <img src="<?php echo plugins_url('ins-2.png', __FILE__); ?>" alt="Image description" class="my-image"  width="750" height="450" />
+         <img src="<?php echo plugins_url('./assets/ins-2.png', __FILE__); ?>" alt="Image description" class="my-image"  width="750" height="450" />
          <hr>
           <p>Once you <b>click</b> over a offer it open a popup with more info which you can customize.</p>
-         <img src="<?php echo plugins_url('ins-3.png', __FILE__); ?>" alt="Image description" class="my-image"  width="750" height="450" />
+         <img src="<?php echo plugins_url('./assets/ins-3.png', __FILE__); ?>" alt="Image description" class="my-image"  width="750" height="450" />
           <p>Following Image shows what each field in <b>General Settings</b> is mapped.</p>
-<img src="<?php echo plugins_url('ins-settings.png', __FILE__); ?>" alt="Image description" class="my-image"  width="750" height="450" />
+<img src="<?php echo plugins_url('./assets/ins-settings.png', __FILE__); ?>" alt="Image description" class="my-image"  width="750" height="450" />
     </div>
     </div>
 </div>
