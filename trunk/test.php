@@ -54,6 +54,8 @@ add_action('woocommerce_single_product_summary', 'product_price_display', 20);
 // Add styles for the product boxes
 function product_box_styles()
 {
+    $border_color = get_option('border_color');
+    $box_shadow_color = get_option('box_shadow_color');
     echo '<style>
         .product-row {
             display: flex;
@@ -66,7 +68,7 @@ function product_box_styles()
             width: calc(50% - 5px);
             text-align: center;
             margin-bottom: 5px;
-            border: 1px solid red;
+            border: 1px solid ' . $border_color . ';
             padding: 2px;
             border-radius: 5px;
             cursor: pointer;
@@ -76,7 +78,7 @@ function product_box_styles()
             margin-right: 7px;
         }
         .product-box:hover {
-            box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3);
+ box-shadow: 0 4px 8px rgba(' . hexdec(substr($box_shadow_color, 1, 2)) . ', ' . hexdec(substr($box_shadow_color, 3, 2)) . ', ' . hexdec(substr($box_shadow_color, 5, 2)) . ', 0.3);
             font-weight: bold;
         }
         .product-row .product-box:first-child:last-child {
@@ -396,6 +398,17 @@ function custom_settings_page()
 </style>
 
             <table class="form-table">
+                    <tr>
+        <td>
+            <label for="border_color">Border Color:</label><br>
+<input type="color" name="border_color" id="border_color" value="<?php echo esc_attr(get_option('border_color', '#00ff00')); ?>" />
+        </td>
+
+          <td>
+            <label for="box_shadow_color">Box Shadow Color:</label><br>
+<input type="color" name="box_shadow_color" id="box_shadow_color" value="<?php echo esc_attr(get_option('box_shadow_color', '#00ff00')); ?>" />
+        </td>
+    </tr>
                 <?php $logos = array(
         'logo',
         'logo2',
@@ -567,6 +580,16 @@ function handle_logo_uploads()
         'logo9',
         'logo10'
     );
+    if (isset($_POST['border_color']))
+    {
+        $border_color = sanitize_hex_color($_POST['border_color']);
+        update_option('border_color', $border_color);
+    }
+    if (isset($_POST['box_shadow_color']))
+    {
+        $box_shadow_color = sanitize_hex_color($_POST['box_shadow_color']);
+        update_option('box_shadow_color', $box_shadow_color);
+    }
     foreach ($logos as $logo)
     {
         $logo_url = get_option($logo);
