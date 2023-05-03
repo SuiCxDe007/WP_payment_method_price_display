@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: Bank/Card Offer Display
+Plugin Name: Card Offer Display
 Plugin URI: https://www.github.com/suicxde007
-Description: Adds the bank/card offers in product page.
-Version: 1.8
+Description: Adds the bank/card offers in product page of woocommerce.
+Version: 1.9
 Author: Kaveen Abeyrathne
 Author URI: https://www.github.com/suicxde007
 License: GPL2
